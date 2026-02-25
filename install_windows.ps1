@@ -3,66 +3,58 @@ $botPath = "C:\boonhlua_bot"
 $DesktopPath = [System.IO.Path]::Combine([Environment]::GetFolderPath("Desktop"), "BoonhluaBot.lnk")
 $StartupPath = [System.IO.Path]::Combine([Environment]::GetFolderPath("Startup"), "BoonhluaBot.lnk")
 
-Write-Host "--- Cleaning old installation ---" -ForegroundColor Yellow
+Write-Host "--- Step 1: Cleaning old installation ---" -ForegroundColor Yellow
 
-# 1. ลบของเก่า (ถ้ามี)
+# Remove old files if exists
 if (Test-Path $botPath) { 
     Remove-Item -Path $botPath -Recurse -Force 
     Write-Host "[+] Removed old bot folder" 
 }
 if (Test-Path $DesktopPath) { 
     Remove-Item -Path $DesktopPath -Force 
-    Write-Host "[+] Removed old Desktop shortcut" 
 }
 if (Test-Path $StartupPath) { 
     Remove-Item -Path $StartupPath -Force 
-    Write-Host "[+] Removed old Startup shortcut" 
 }
 
-Write-Host "--- Starting Clean Installation ---" -ForegroundColor Cyan
+Write-Host "--- Step 2: Checking Requirements ---" -ForegroundColor Cyan
 
-# 2. เช็คสิทธิ์ Admin
-if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-    Write-Host "Error: Please run as Administrator!" -ForegroundColor Red
-    pause; exit
-}
-
-# 3. ตรวจสอบ Node.js/Git (ถ้ามีแล้วจะข้าม)
+# Check for Node.js
 if (!(Get-Command node -ErrorAction SilentlyContinue)) {
-    Write-Host "Installing Node.js..." -ForegroundColor Yellow
+    Write-Host "Node.js not found. Installing..." -ForegroundColor Yellow
     winget install --id OpenJS.NodeJS.LTS -e --source winget
-    Write-Host "Please restart PowerShell and run again." -ForegroundColor Cyan
+    Write-Host "Please restart PowerShell and run this script again." -ForegroundColor Cyan
     exit
 }
 
-# 4. สร้างโฟลเดอร์ใหม่และโหลดไฟล์
+# 4. Create Folder and Download
 New-Item -Path $botPath -ItemType Directory | Out-Null
 Set-Location $botPath
 Write-Host "Downloading latest bunlua.js..." -ForegroundColor Cyan
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/boonluea/bot_youtybe/main/bunlua.js" -OutFile "bunlua.js"
 
-# 5. ลง Dependencies ใหม่ทั้งหมด
-Write-Host "Installing Playwright (Clean)..." -ForegroundColor Yellow
+# 5. Install Dependencies
+Write-Host "Installing Playwright..." -ForegroundColor Yellow
 npm init -y | Out-Null
 npm install playwright --save
 npx playwright install chromium
 
-# 6. สร้างไฟล์รันและ Shortcut ใหม่
+# 6. Create Start File and Shortcuts
 $batContent = "@echo off`ntitle Boonhlua Bot`ncd /d `"$botPath`"`nnode bunlua.js`npause"
 $batContent | Out-File -FilePath "$botPath\start_bot.bat" -Encoding ASCII
 
 $WshShell = New-Object -ComObject WScript.Shell
-# Shortcut หน้าจอ
+# Desktop Link
 $S1 = $WshShell.CreateShortcut($DesktopPath)
 $S1.TargetPath = "$botPath\start_bot.bat"
 $S1.WorkingDirectory = $botPath
 $S1.Save()
-# Shortcut Startup
+# Startup Link
 $S2 = $WshShell.CreateShortcut($StartupPath)
 $S2.TargetPath = "$botPath\start_bot.bat"
 $S2.WorkingDirectory = $botPath
 $S2.Save()
 
 Write-Host "--- Clean Installation Finished! ---" -ForegroundColor Green
-Write-Host "Bot is ready at: $botPath"
+Write-Host "Check your Desktop for BoonhluaBot shortcut."
 pause
