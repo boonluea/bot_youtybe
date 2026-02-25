@@ -13,6 +13,7 @@ PowerShell (Run as Administrator)
 รันคำสั่งทีละบรรทัด
 """""""""""""""""""""""""""
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser  //กด Y  
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 powershell -c "irm https://community.chocolatey.org/install.ps1|iex"
 choco install nodejs --version="24.14.0"
 winget install --id Git.Git -e --source winget
