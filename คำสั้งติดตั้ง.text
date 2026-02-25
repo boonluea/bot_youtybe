@@ -12,7 +12,9 @@ windows
 PowerShell (Run as Administrator)
 รันคำสั่งทีละบรรทัด
 """""""""""""""""""""""""""
-Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser  //กด Y  
+powershell -c "irm https://community.chocolatey.org/install.ps1|iex"
+choco install nodejs --version="24.14.0"
 winget install --id Git.Git -e --source winget
 npm install -g openclaw
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/boonluea/bot_youtybe/main/install_windows.ps1'))
